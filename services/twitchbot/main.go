@@ -434,7 +434,7 @@ func checkForRankCommand(message *twitch.PrivateMessage, client *twitch.Client) 
 		if err != nil {
 			return
 		}
-		if cachedObj.LastExecuted > time.Now().Unix()-cachedObj.CooldownSeconds || !strings.HasPrefix(message.Message, "!"+cachedObj.Command) {
+		if cachedObj.LastExecuted > time.Now().Unix()-cachedObj.CooldownSeconds || !HasCommandPrefix(message.Message, "!"+cachedObj.Command) {
 			return
 		}
 		log.WithField("event", "rank_command").WithField("channel", message.Channel).Info("Executing rank command")
@@ -476,7 +476,7 @@ func checkForRankCommand(message *twitch.PrivateMessage, client *twitch.Client) 
 		return
 	}
 
-	if message.Message == "!"+dbUser.TwitchCommandName {
+	if HasCommandPrefix(message.Message, "!"+dbUser.TwitchCommandName) {
 
 		platformMissing := dbUser.RlPlatform == ""
 		usernameMissing := dbUser.RlUsername == ""
@@ -530,6 +530,12 @@ func checkForRankCommand(message *twitch.PrivateMessage, client *twitch.Client) 
 			client.Say(message.Channel, substr(replyStr, 0, 500))
 		}
 	}
+}
+
+func HasCommandPrefix(text string, command string) bool {
+	text = strings.ToLower(text)
+	command = strings.ToLower(command)
+	return text == command || strings.HasPrefix(text, command+" ")
 }
 
 func substr(input string, start int, length int) string {
