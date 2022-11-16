@@ -44,7 +44,7 @@ func main() {
 	}
 
 	client := twitch.NewClient(configuration.TwitchUsername, configuration.TwitchToken)
-	client.SetJoinRateLimiter(twitch.CreateDefaultRateLimiter())
+	client.SetJoinRateLimiter(twitch.CreateVerifiedRateLimiter())
 
 	redisCache = cache.NewCache(configuration.CacheUrl)
 
@@ -60,7 +60,7 @@ func main() {
 		go func() {
 			namesCursor := ""
 			for {
-				names, newNamesCursor, err := botDb.GetUserNames(namesCursor, 20)
+				names, newNamesCursor, err := botDb.GetUserNames(namesCursor, 200)
 				if newNamesCursor != nil {
 					namesCursor = *newNamesCursor
 				}
@@ -78,7 +78,7 @@ func main() {
 				if newNamesCursor == nil || len(names) < 20 {
 					break
 				}
-				time.Sleep(time.Second * 15)
+				time.Sleep(time.Second * 1)
 			}
 		}()
 		client.Say(configuration.TwitchUsername, configuration.TwitchUsername+" online! MrDestructoid")
