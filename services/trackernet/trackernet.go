@@ -17,8 +17,10 @@ var httpClient = http.Client{
 
 func GetRanks(platform string, user string) (*trackernet.GetRankResponse, error) {
 
-	requestUrl := configuration.TrackerNet.BaseUrl + "/" + platform + "/" + strings.Replace(url.QueryEscape(user), "+", "%20", -1)
-	req, err := http.NewRequest("GET", configuration.ScraperUrl+"?url="+url.QueryEscape(requestUrl), nil)
+	escapedUser := strings.Replace(url.QueryEscape(user), "+", "%20", -1)
+	requestUrl := "https://rocketleague.tracker.network/rocket-league/profile/" + platform + "/" + escapedUser + "/overview"
+	xhrRequestUrl := configuration.TrackerNet.BaseUrl + "/" + platform + "/" + escapedUser
+	req, err := http.NewRequest("GET", configuration.ScraperUrl+"?url="+url.QueryEscape(requestUrl)+"&xhrUrl="+url.QueryEscape(xhrRequestUrl), nil)
 	if err != nil {
 		return nil, err
 	}
