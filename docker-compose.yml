@@ -22,13 +22,13 @@ services:
       replicas: 2
       restart_policy:
         condition: on-failure
-  db:
-    image: postgres:14.2
-    environment:
-      - POSTGRES_PASSWORD=postgres
-    volumes:
-      - "./db/init:/docker-entrypoint-initdb.d"
-      - "./db/data:/var/lib/postgresql/data" # to persist data:
+  # db:
+  #   image: postgres:14.2
+  #   environment:
+  #     - POSTGRES_PASSWORD=postgres
+  #   volumes:
+  #     - "./db/init:/docker-entrypoint-initdb.d"
+  #     - "./db/data:/var/lib/postgresql/data" # to persist data:
   cache:
     image: redis
   flyway:
@@ -52,17 +52,17 @@ services:
     depends_on:
       - webscraper
       - cache
-  twitchbot:
-    build:
-      context: ./
-      dockerfile: ./services/twitchbot/Dockerfile
-    depends_on:
-      - trackernet
-      - cache
-      - db
-    environment:
-      - TWITCH_TOKEN=oauth:xxx
-      - TWITCH_USER=xxxx
+  # twitchbot:
+  #   build:
+  #     context: ./
+  #     dockerfile: ./services/twitchbot/Dockerfile
+  #   depends_on:
+  #     - trackernet
+  #     - cache
+  #     - db
+  #   environment:
+  #     - TWITCH_TOKEN=oauth:xxx
+  #     - TWITCH_USER=xxxx
   api:
     build:
       context: ./
@@ -70,9 +70,9 @@ services:
     depends_on:
       - trackernet
       - cache
-      - db
+      # - db
     ports:
-      - "8080:8080"
+      - "3012:8080"
   prometheus:
     image: prom/prometheus
     ports:

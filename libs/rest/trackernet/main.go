@@ -6,10 +6,15 @@ type GetRankResponse struct {
 }
 
 type Ranking struct {
-	Playlist Playlist `json:"playlist"`
-	Mmr      int      `json:"mmr"`
-	Rank     int      `json:"rank"`
-	Division int      `json:"division"`
+	Playlist     Playlist `json:"playlist"`
+	Mmr          int      `json:"mmr"`
+	Rank         int      `json:"rank"`
+	RankName     string   `json:"rankName"`
+	Division     int      `json:"division"`
+	DivisionName string   `json:"divisionName"`
+	DeltaUp      int      `json:"deltaUp"`
+	DeltaDown    int      `json:"deltaDown"`
+	WinStreak    string   `json:"winStreak"`
 }
 
 type Platform string

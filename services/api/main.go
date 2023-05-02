@@ -4,19 +4,22 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 	"github.com/tkanos/gonfig"
-	"github.com/yannismate/yannismate-api/libs/cache"
+
+	// "github.com/yannismate/yannismate-api/libs/cache"
 	"github.com/yannismate/yannismate-api/libs/httplog"
-	"github.com/yannismate/yannismate-api/libs/ratelimit"
+	// "github.com/yannismate/yannismate-api/libs/ratelimit"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strconv"
+
+	// "strconv"
 	"time"
 )
 
 var configuration = Configuration{}
-var ratelimiter ratelimit.SharedRateLimiter
-var apiDb *ApiDb
+
+// var ratelimiter ratelimit.SharedRateLimiter
+// var apiDb *ApiDb
 
 func main() {
 	metricsServer := http.NewServeMux()
@@ -34,64 +37,64 @@ func main() {
 		return
 	}
 
-	redisCache := cache.NewCache(configuration.CacheUrl)
-	ratelimiter = ratelimit.NewSharedRateLimiter(&redisCache)
+	// redisCache := cache.NewCache(configuration.CacheUrl)
+	// ratelimiter = ratelimit.NewSharedRateLimiter(&redisCache)
 
-	apiDb, err = NewApiDb(configuration.DbUri)
-	if err != nil {
-		log.WithField("event", "connect_db").Fatal(err)
-		return
-	}
+	// apiDb, err = NewApiDb(configuration.DbUri)
+	// if err != nil {
+	// 	log.WithField("event", "connect_db").Fatal(err)
+	// 	return
+	// }
 
-	http.Handle("/rank", httplog.WithLogging(withRateLimit(rankHandler())))
+	http.Handle("/rank", httplog.WithLogging(rankHandler()))
 	err = http.ListenAndServe(":8080", nil)
 	if err != nil {
 		log.WithField("event", "start_server").Fatal(err)
 	}
 }
 
-func withRateLimit(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// func withRateLimit(next http.Handler) http.Handler {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		apiKey := r.Header.Get("X-API-KEY")
-		if apiKey == "" {
-			apiKey = r.URL.Query().Get("api_key")
-		}
-		if apiKey == "" {
-			w.WriteHeader(403)
-			_, _ = w.Write([]byte("No api key specified"))
-			return
-		}
+// 		apiKey := r.Header.Get("X-API-KEY")
+// 		if apiKey == "" {
+// 			apiKey = r.URL.Query().Get("api_key")
+// 		}
+// 		if apiKey == "" {
+// 			w.WriteHeader(403)
+// 			_, _ = w.Write([]byte("No api key specified"))
+// 			return
+// 		}
 
-		limitRemaining, err := ratelimiter.AllowIfTracked("apikey:" + apiKey)
-		if err != nil {
+// 		limitRemaining, err := ratelimiter.AllowIfTracked("apikey:" + apiKey)
+// 		if err != nil {
 
-			apiUser, err := apiDb.GetApiUserByKey(apiKey)
-			if err != nil {
-				_, _ = w.Write([]byte("Api key invalid"))
-				w.WriteHeader(403)
-				return
-			}
+// 			apiUser, err := apiDb.GetApiUserByKey(apiKey)
+// 			if err != nil {
+// 				_, _ = w.Write([]byte("Api key invalid"))
+// 				w.WriteHeader(403)
+// 				return
+// 			}
 
-			limitRemaining, err = ratelimiter.AllowNew("apikey:"+apiKey, apiUser.RateLimit300, time.Second*300)
-			if err != nil {
-				log.WithField("event", "ratelimiter_allow_new").Error(err)
-				w.WriteHeader(500)
-				return
-			}
-			w.Header().Set("RateLimit-Remaining", strconv.Itoa(limitRemaining))
+// 			limitRemaining, err = ratelimiter.AllowNew("apikey:"+apiKey, apiUser.RateLimit300, time.Second*300)
+// 			if err != nil {
+// 				log.WithField("event", "ratelimiter_allow_new").Error(err)
+// 				w.WriteHeader(500)
+// 				return
+// 			}
+// 			w.Header().Set("RateLimit-Remaining", strconv.Itoa(limitRemaining))
 
-		} else {
-			if limitRemaining < 0 {
-				w.WriteHeader(429)
-				_, _ = w.Write([]byte("Rate limit exceeded"))
-				return
-			}
-			w.Header().Set("RateLimit-Remaining", strconv.Itoa(limitRemaining))
-		}
-		next.ServeHTTP(w, r)
-	})
-}
+// 		} else {
+// 			if limitRemaining < 0 {
+// 				w.WriteHeader(429)
+// 				_, _ = w.Write([]byte("Rate limit exceeded"))
+// 				return
+// 			}
+// 			w.Header().Set("RateLimit-Remaining", strconv.Itoa(limitRemaining))
+// 		}
+// 		next.ServeHTTP(w, r)
+// 	})
+// }
 
 var httpClient = http.Client{
 	Timeout: time.Second * 10,

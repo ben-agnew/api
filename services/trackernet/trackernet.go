@@ -2,13 +2,14 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/yannismate/yannismate-api/libs/rest/trackernet"
-	"github.com/yannismate/yannismate-api/libs/rest/webscraper"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/yannismate/yannismate-api/libs/rest/trackernet"
+	"github.com/yannismate/yannismate-api/libs/rest/webscraper"
 )
 
 var httpClient = http.Client{
@@ -91,15 +92,30 @@ type TggSegment struct {
 type TggSegmentMeta struct {
 	Name string `json:"name"`
 }
+type TggSegmentDivMeta struct {
+	Name      string `json:"name"`
+	DeltaUp   int    `json:"deltaUp"`
+	DeltaDown int    `json:"deltaDown"`
+}
 
 type TggSegmentStats struct {
-	Tier     TggStatsValue `json:"tier"`
-	Division TggStatsValue `json:"division"`
-	Rating   TggStatsValue `json:"rating"`
+	Tier      TggStatsValue    `json:"tier"`
+	Division  TggStatsDivValue `json:"division"`
+	Rating    TggStatsValue    `json:"rating"`
+	WinStreak WinStreak        `json:"winStreak"`
 }
 
 type TggStatsValue struct {
-	Value int `json:"value"`
+	Value    int            `json:"value"`
+	Metadata TggSegmentMeta `json:"metadata"`
+}
+type TggStatsDivValue struct {
+	Value    int               `json:"value"`
+	Metadata TggSegmentDivMeta `json:"metadata"`
+}
+
+type WinStreak struct {
+	DisplayValue string `json:"displayValue"`
 }
 
 type TggError struct{}
@@ -120,9 +136,14 @@ func (seg *TggSegment) toRanking() *trackernet.Ranking {
 	}
 
 	return &trackernet.Ranking{
-		Playlist: playlist,
-		Mmr:      seg.Stats.Rating.Value,
-		Rank:     seg.Stats.Tier.Value,
-		Division: seg.Stats.Division.Value,
+		Playlist:     playlist,
+		Mmr:          seg.Stats.Rating.Value,
+		Rank:         seg.Stats.Tier.Value,
+		RankName:     seg.Stats.Tier.Metadata.Name,
+		Division:     seg.Stats.Division.Value,
+		DivisionName: seg.Stats.Division.Metadata.Name,
+		DeltaUp:      seg.Stats.Division.Metadata.DeltaUp,
+		DeltaDown:    seg.Stats.Division.Metadata.DeltaDown,
+		WinStreak:    seg.Stats.WinStreak.DisplayValue,
 	}
 }

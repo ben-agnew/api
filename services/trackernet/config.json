@@ -1,7 +1,7 @@
 {
   "cache":  {
     "redisUrl": "cache:6379",
-    "ttlSeconds": 300
+    "ttlSeconds": 60
   },
   "trackerNet": {
     "baseUrl": "https://api.tracker.gg/api/v2/rocket-league/standard/profile"
